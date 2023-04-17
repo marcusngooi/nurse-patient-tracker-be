@@ -1,9 +1,9 @@
-// Lab 2 Exercise 1
+// Group Project
 // Author:      Marcus Ngooi (301147411)
 // Description: Configure database.
 
 module.exports = {
-    URI: 'mongodb://127.0.0.1/student-course-db',
-    sessionSecret: '***REMOVED***',
-    secretKey: '***REMOVED***'
+    URI: '***REMOVED***',
+    sessionSecret: '***REMOVED***', // Not sure whether this is needed
+    secretKey: '***REMOVED***' // Not sure whether this is needed
 }

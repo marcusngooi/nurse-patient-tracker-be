@@ -1,19 +1,18 @@
-// Lab 3 Exercise 1
+// Group Project
 // Author:      Marcus Ngooi (301147411)
-// Description: Connect both Student and Course Schemas. 
-var GraphQLSchema = require("graphql").GraphQLSchema;
-var GraphQLObjectType = require("graphql").GraphQLObjectType;
+// Description: Connect all schemas. 
+const GraphQLSchema = require("graphql").GraphQLSchema;
+const GraphQLObjectType = require("graphql").GraphQLObjectType;
 
-var { studentQuery, studentMutation } = require("./studentSchemas");
+const { userQuery, userMutation } = require("./userSchemas");
+const { vitalsQuery, vitalsMutation } = require("./vitalsSchemas");
+const { tipQuery, tipMutation } = require("./tipSchemas");
 
-var { courseQuery, courseMutation } = require("./courseSchemas");
-
-const queryType = new GraphQLObjectType({
-  name: "Query",
-  fields: function () {
+const queryType = new GraphQLObjectType({  fields: function () {
     return {
-      ...studentQuery,
-      ...courseQuery,
+      ...userQuery,
+      ...vitalsQuery,
+      ...tipQuery
     };
   },
 });
@@ -22,8 +21,9 @@ const mutation = new GraphQLObjectType({
   name: "Mutation",
   fields: function () {
     return {
-      ...studentMutation,
-      ...courseMutation,
+      ...userMutation,
+      ...vitalsMutation,
+      ...tipMutation
     };
   },
 });

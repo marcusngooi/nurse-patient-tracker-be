@@ -18,7 +18,7 @@ module.exports.login = async (req, res, next) => {
       console.log(err);
       return next(err);
     }
-  );
+  );// Not sure whether this is needed
 
   if (bcrypt.compareSync(password, student.password)) {
     const token = jwt.sign(
