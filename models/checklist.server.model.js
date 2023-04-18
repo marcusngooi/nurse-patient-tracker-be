@@ -3,6 +3,10 @@
 const mongoose = require("mongoose");
 
 const Checklist = mongoose.Schema({
+    patient: {
+        type: String,
+        ref: "Patient"
+    },
     fever: {
         type: Boolean,
     },

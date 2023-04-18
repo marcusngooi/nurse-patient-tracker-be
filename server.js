@@ -36,6 +36,7 @@ const server = http.createServer(app);
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
+server.timeout = 300000;
 
 /**
  * Event listener for HTTP server "error" event.

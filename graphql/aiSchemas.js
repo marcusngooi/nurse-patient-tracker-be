@@ -7,82 +7,94 @@
 //              Tatsiana Ptushko (301182173)
 // Description: AI Schema.
 
+const { GraphQLObjectType } = require("graphql");
+
 const GraphQLList = require("graphql").GraphQLList;
+const GraphQLString = require("graphql").GraphQLString;
 const GraphQLFloat = require("graphql").GraphQLFloat;
-const GraphQLInt = require("graphql").GraphQLInt;
+// const GraphQLInt = require("graphql").GraphQLInt;
 const GraphQLNonNull = require("graphql").GraphQLNonNull;
+
+const resultsType = new GraphQLObjectType({
+  name: "results",
+  fields: function () {
+    return {
+      resultsArray: {
+        type: GraphQLList(GraphQLFloat),
+      },
+    };
+  },
+});
 
 const queryType = {
   hepatitisStatus: {
-    type: GraphQLList(GraphQLFloat),
+    type: resultsType,
+    // type: GraphQLList(GraphQLFloat),
     args: {
       age: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       sex: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       steroid: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       antivirals: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       fatigue: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       malaise: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       anorexia: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       liverBig: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       liverFirm: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       spleenPalpable: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       spiders: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       ascites: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       varices: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       bilurubin: {
-        type: new GraphQLNonNull(GraphQLFloat),
+        type: new GraphQLNonNull(GraphQLString),
       },
       alkPhosphate: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       sGot: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       albumin: {
-        type: new GraphQLNonNull(GraphQLFloat),
+        type: new GraphQLNonNull(GraphQLString),
       },
       protime: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
       histology: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve: (root, params, context) => {
+    resolve: async (root, params, context) => {
       const tf = require("@tensorflow/tfjs");
       require("@tensorflow/tfjs-node");
       //load iris training and testing data
       const hep = require("../hep.json");
-      //   const hepTesting = require("../../hep_test.json");
-      //   console.log(hepTesting);
       // convert/setup our data for tensorflow.js
-      //
       //tensor of features for training data
       console.log("trainingData");
       const trainingData = tf.tensor2d(
@@ -108,7 +120,6 @@ const queryType = {
           item.Histology,
         ])
       );
-      //
       //tensor of output for training data
       //console.log(trainingData.dataSync())
       //
@@ -124,36 +135,6 @@ const queryType = {
       );
       console.log("Output Data: ---------");
       console.log(outputData.dataSync());
-
-      //
-      //tensor of features for testing data
-      //   const testingData = tf.tensor2d(
-      //     hepTesting.map((item) => [
-      //       item.Age,
-      //       item.Sex,
-      //       item.Steroid,
-      //       item.Antivirals,
-      //       item.Fatigue,
-      //       item.Malaise,
-      //       item.Anorexia,
-      //       item.Liver_big,
-      //       item.Liver_firm,
-      //       item.Spleen_palpable,
-      //       item.Spiders,
-      //       item.Ascites,
-      //       item.Varices,
-      //       item.Bilurubin,
-      //       item.Alk_phosphate,
-      //       item.Sgot,
-      //       item.Albumin,
-      //       item.Protime,
-      //       item.Histology,
-      //     ])
-      //   );
-      //   console.log(testingData.dataSync());
-      //   testingData.array().then((array) => {
-      //     console.log(array);
-      //   });
       const inputData = tf.tensor2d([
         [
           parseInt(params.age),
@@ -240,25 +221,38 @@ const queryType = {
         results.print();
         // get the values from the tf.Tensor
         //var tensorData = results.dataSync();
+        console.log(
+          parseInt(params.age),
+          parseInt(params.sex),
+          parseInt(params.steroid),
+          parseInt(params.antivirals),
+          parseInt(params.fatigue),
+          parseInt(params.malaise),
+          parseInt(params.anorexia),
+          parseInt(params.liverBig),
+          parseInt(params.liverFirm),
+          parseInt(params.spleenPalpable),
+          parseInt(params.spiders),
+          parseInt(params.ascites),
+          parseInt(params.varices),
+          parseFloat(params.bilurubin),
+          parseInt(params.alkPhosphate),
+          parseInt(params.sGot),
+          parseFloat(params.albumin),
+          parseInt(params.protime),
+          parseInt(params.histology)
+        );
         results.array().then((array) => {
           console.log(array);
-          //   var resultForTest1 = array[0];
-          //   var resultForTest2 = array[1];
-          //   var resultForTest3 = array[2];
-          //var dataToSent = {row1: resultForTest1,row2: resultForTest2, row3: resultForTest3}
-
           var resultForData1 = array[0];
-          console.log(resultForData1);
-          return resultForData1;
-          //   res.render("results", {
-          //     results: resultForData1,
-          //     // resultForTest1: resultForTest1,
-          //     // resultForTest2: resultForTest2,
-          //     // resultForTest3: resultForTest3,
-          //   });
+          const dataToSend = {
+            resultsArray: resultForData1,
+          };
+          console.log(dataToSend);
+          return dataToSend;
         });
       } //end of run function
-      run();
+      await run();
       //
     },
   },

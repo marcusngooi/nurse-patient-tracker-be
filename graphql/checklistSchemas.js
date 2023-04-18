@@ -3,6 +3,7 @@ const GraphQLList = require("graphql").GraphQLList;
 const GraphQLNonNull = require("graphql").GraphQLNonNull;
 const GraphQLString = require("graphql").GraphQLString;
 const GraphQLID = require("graphql").GraphQLID;
+const GraphQLBoolean = require("graphql").GraphQLBoolean
 const mongoose = require("mongoose");
 
 
@@ -27,7 +28,7 @@ const checklistType = new GraphQLObjectType({
             breathing: {
                 type: GraphQLBoolean
             },
-            bodyAches: {
+            bodyaches: {
                 type: GraphQLBoolean
             },
             headache: {
@@ -112,19 +113,40 @@ const Mutation = {
         },
 
         resolve: async (root, params, context) => {
-            let checklist = await Checklist.findOne({fever: params.fever});
-            if (!checklist) {
-                const checkListModel = new Checklist(params);
-                checklist = await checkListModel
-                    .save()
-                    .then((checklistDoc) => checklistDoc.toObject());
-                if (!checklist) {
-                    throw new Error("Error")
-                }
-            };
-
-            return checklist;
-        },
+            const token = context.req.cookies.token;
+            let userId;
+            if (token) {
+              const decodedToken = jwt.decode(token);
+              userId = decodedToken.id;
+            } else {
+              userId = params._id;
+            }
+      
+            const checklist = new Checklist({
+              patient: userId,
+              date: new Date(),
+              ...params,
+            });
+      
+            const savedChecklist = await checklist.save();
+      
+            console.log(savedChecklist);
+      
+            const user = await Patient.findById(userId);
+      
+            console.log(user);
+      
+            await Patient.updateOne(
+              { _id: userId },
+              {
+                $push: {
+                    checklist: savedChecklist._id,
+                },
+              }
+            );
+      
+            return savedChecklist;
+          },
     },
 };
 
