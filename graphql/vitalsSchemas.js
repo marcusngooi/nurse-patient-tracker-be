@@ -170,7 +170,8 @@ const Mutation = {
     type: vitalsType,
     args: {
       id: {
-        type: new GraphQLNonNull(GraphQLString)
+        type: new GraphQLNonNull(GraphQLString),
+        name: "id",
       },
       weight: {
         type: new GraphQLNonNull(GraphQLFloat),
@@ -189,31 +190,27 @@ const Mutation = {
       },
     },
     resolve: async (root, params, context) => {
-      const token = context.req.cookies.token;
-      let userId;
-      if (token) {
-        const decodedToken = jwt.decode(token);
-        userId = decodedToken.id;
-      } else {
-        userId = params._id;
-      }
-
+      const patientId = params.id;
       const vitals = new Vital({
-        patient: userId,
+        patient: patientId,
         date: new Date(),
-        ...params,
+        weight: params.weight,
+        bodyTemperature: params.bodyTemperature,
+        heartRate: params.heartRate,
+        bloodPressure: params.bloodPressure,
+        respiratoryRate: params.respiratoryRate,
       });
 
       const savedVitals = await vitals.save();
 
       console.log(savedVitals);
 
-      const user = await Patient.findById(userId);
+      const user = await Patient.findById(patientId);
 
       console.log(user);
 
       await Patient.updateOne(
-        { _id: userId },
+        { _id: patientId },
         {
           $push: {
             vitals: savedVitals._id,
