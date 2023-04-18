@@ -33,6 +33,13 @@ const User = mongoose.Schema({
       default: [],
     },
   ],
+  checklist: [
+    {
+      type: [String],
+      ref: "checklist",
+      default: [],
+    },
+  ],
 });
 
 // // Configure the 'Student' to use getters and virtuals when transforming to JSON

@@ -42,6 +42,9 @@ const userType = new GraphQLObjectType({
       vitals: {
         type: GraphQLList(GraphQLString),
       },
+      checklists: {
+        type: GraphQLList(GraphQLString),
+      },
     };
   },
 });
@@ -151,6 +154,9 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLString),
       },
       vitals: {
+        type: GraphQLList(GraphQLString),
+      },
+      checklists: {
         type: GraphQLList(GraphQLString),
       },
     },

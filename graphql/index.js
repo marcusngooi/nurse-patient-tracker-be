@@ -9,6 +9,7 @@ const { vitalsQuery, vitalsMutation } = require("./vitalsSchemas");
 const { tipQuery, tipMutation } = require("./tipSchemas");
 const { alertQuery, alertMutation } = require("./alertSchemas");
 const { aiQuery } = require("./aiSchemas");
+const { checklistQuery, checklistMutation } = require("./checklistSchemas");
 
 const queryType = new GraphQLObjectType({
   name: "Query",
@@ -19,6 +20,7 @@ const queryType = new GraphQLObjectType({
       ...tipQuery,
       ...alertQuery,
       ...aiQuery,
+      ...checklistQuery,
     };
   },
 });
@@ -31,6 +33,7 @@ const mutation = new GraphQLObjectType({
       ...vitalsMutation,
       ...tipMutation,
       ...alertMutation,
+      ...checklistMutation,
     };
   },
 });
