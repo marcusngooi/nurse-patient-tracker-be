@@ -7,6 +7,8 @@ const GraphQLObjectType = require("graphql").GraphQLObjectType;
 const { userQuery, userMutation } = require("./userSchemas");
 const { vitalsQuery, vitalsMutation } = require("./vitalsSchemas");
 const { tipQuery, tipMutation } = require("./tipSchemas");
+const { alertQuery, alertMutation } = require("./alertSchemas");
+const { aiQuery } = require("./aiSchemas");
 
 const queryType = new GraphQLObjectType({
   name: "Query",
@@ -15,6 +17,8 @@ const queryType = new GraphQLObjectType({
       ...userQuery,
       ...vitalsQuery,
       ...tipQuery,
+      ...alertQuery,
+      ...aiQuery,
     };
   },
 });
@@ -26,6 +30,7 @@ const mutation = new GraphQLObjectType({
       ...userMutation,
       ...vitalsMutation,
       ...tipMutation,
+      ...alertMutation,
     };
   },
 });

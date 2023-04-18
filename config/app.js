@@ -20,10 +20,6 @@ mongoDB.once("open", () => {
   console.log("Connected to MongoDB...");
 });
 
-const indexRouter = require("../routes/index.server.routes");
-const coursesRouter = require("../routes/courses.server.routes");
-const studentsRouter = require("../routes/students.server.routes");
-
 const app = express();
 
 app.use(morgan("dev"));
@@ -47,9 +43,5 @@ app.use(
     secret: db.sessionSecret,
   })
 );
-
-app.use("/api", indexRouter);
-app.use("/api/students", studentsRouter);
-app.use("/api/courses", coursesRouter);
 
 module.exports = app;
