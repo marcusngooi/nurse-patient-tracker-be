@@ -218,62 +218,6 @@ const Mutation = {
       return user; // use when testing in GraphiQL
     },
   },
-
-  // updateUserCourse: {
-  //   type: studentType,
-  //   args: {
-  //     email: {
-  //       type: new GraphQLNonNull(GraphQLString),
-  //     },
-  //     course: {
-  //       type: new GraphQLNonNull(GraphQLString),
-  //     },
-  //   },
-  //   resolve: async (root, params) => {
-  //     const user = await StudentModel.findOneAndUpdate(
-  //       {
-  //         email: params.email,
-  //       },
-  //       {
-  //         $addToSet: { courses: params.course },
-  //       }
-  //     ).exec();
-
-  //     if (!user) {
-  //       throw new Error("Error");
-  //     }
-
-  //     return user;
-  //   },
-  // },
-
-  // deleteUserCourse: {
-  //   type: studentType,
-  //   args: {
-  //     email: {
-  //       type: new GraphQLNonNull(GraphQLString),
-  //     },
-  //     course: {
-  //       type: new GraphQLNonNull(GraphQLString),
-  //     },
-  //   },
-  //   resolve: async (root, params) => {
-  //     const user = await StudentModel.findOneAndUpdate(
-  //       {
-  //         email: params.email,
-  //       },
-  //       {
-  //         $pull: { courses: params.course },
-  //       }
-  //     ).exec();
-
-  //     if (!user) {
-  //       throw new Error("Error");
-  //     }
-
-  //     return user;
-  //   },
-  // },
 };
 
 module.exports = {
