@@ -242,17 +242,16 @@ const queryType = {
           parseInt(params.protime),
           parseInt(params.histology)
         );
-        results.array().then((array) => {
-          console.log(array);
-          var resultForData1 = array[0];
-          const dataToSend = {
-            resultsArray: resultForData1,
-          };
-          console.log(dataToSend);
-          return dataToSend;
-        });
+        const resultsArray = await results.array();
+        console.log(resultsArray);
+        var resultForData1 = resultsArray[0];
+        const dataToSend = {
+          resultsArray: resultForData1,
+        };
+        console.log(dataToSend);
+        return dataToSend;
       } //end of run function
-      await run();
+      return await run();
       //
     },
   },
