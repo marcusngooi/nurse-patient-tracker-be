@@ -24,19 +24,22 @@ const checklistType = new GraphQLObjectType({
             fatigue: {
                 type: GraphQLBoolean
             },
+            breathing: {
+                type: GraphQLBoolean
+            },
             bodyAches: {
                 type: GraphQLBoolean
             },
             headache: {
                 type: GraphQLBoolean
             },
-            losstTastesSmell: {
+            smell: {
                 type: GraphQLBoolean
             },
-            soreThroat: {
+            sorethroat: {
                 type: GraphQLBoolean
             },
-            runnyNose: {
+            runnynose: {
                 type: GraphQLBoolean
             },
             vomiting: {
@@ -48,3 +51,84 @@ const checklistType = new GraphQLObjectType({
         };
     },
 });
+
+const queryType = {
+    checklist: {
+        type: checklistType,
+        args: {
+            id: {
+                name: "_id",
+                type: GraphQLString
+            },
+        },
+        resolve: function (root, params) {
+            const checklistInfo = Checklist.findById(params.id).exec();
+            if (!checklistInfo) {
+                throw new Error("Error");
+            }
+            return checklistInfo;
+        },
+    },
+};
+
+const Mutation = {
+    CheckSymptoms: {
+        type: checklistType,
+        args: {
+            fever: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            cough: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            fatigue: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            breathing: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            bodyaches: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            headache: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            smell: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            sorethroat: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            runnynose: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            vomiting: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+            diarrhea: {
+                type: GraphQLNonNull(GraphQLBoolean)
+            },
+
+        },
+
+        resolve: async (root, params, context) => {
+            let checklist = await Checklist.findOne({fever: params.fever});
+            if (!checklist) {
+                const checkListModel = new Checklist(params);
+                checklist = await checkListModel
+                    .save()
+                    .then((checklistDoc) => checklistDoc.toObject());
+                if (!checklist) {
+                    throw new Error("Error")
+                }
+            };
+
+            return checklist;
+        },
+    },
+};
+
+module.exports = {
+    checklistQuery: queryType,
+    checklistMutation: Mutation,
+};

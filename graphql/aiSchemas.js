@@ -9,10 +9,71 @@
 
 const GraphQLList = require("graphql").GraphQLList;
 const GraphQLFloat = require("graphql").GraphQLFloat;
+const GraphQLInt = require("graphql").GraphQLInt;
+const GraphQLNonNull = require("graphql").GraphQLNonNull;
 
 const queryType = {
   hepatitisStatus: {
     type: GraphQLList(GraphQLFloat),
+    args: {
+      age: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      sex: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      steroid: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      antivirals: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      fatigue: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      malaise: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      anorexia: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      liverBig: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      liverFirm: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      spleenPalpable: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      spiders: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      ascites: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      varices: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      bilurubin: {
+        type: new GraphQLNonNull(GraphQLFloat),
+      },
+      alkPhosphate: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      sGot: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      albumin: {
+        type: new GraphQLNonNull(GraphQLFloat),
+      },
+      protime: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      histology: {
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+    },
     resolve: (root, params, context) => {
       const tf = require("@tensorflow/tfjs");
       require("@tensorflow/tfjs-node");
@@ -181,19 +242,20 @@ const queryType = {
         //var tensorData = results.dataSync();
         results.array().then((array) => {
           console.log(array);
-        //   var resultForTest1 = array[0];
-        //   var resultForTest2 = array[1];
-        //   var resultForTest3 = array[2];
+          //   var resultForTest1 = array[0];
+          //   var resultForTest2 = array[1];
+          //   var resultForTest3 = array[2];
           //var dataToSent = {row1: resultForTest1,row2: resultForTest2, row3: resultForTest3}
 
           var resultForData1 = array[0];
+          console.log(resultForData1);
           return resultForData1;
-        //   res.render("results", {
-        //     results: resultForData1,
-        //     // resultForTest1: resultForTest1,
-        //     // resultForTest2: resultForTest2,
-        //     // resultForTest3: resultForTest3,
-        //   });
+          //   res.render("results", {
+          //     results: resultForData1,
+          //     // resultForTest1: resultForTest1,
+          //     // resultForTest2: resultForTest2,
+          //     // resultForTest3: resultForTest3,
+          //   });
         });
       } //end of run function
       run();

@@ -12,19 +12,22 @@ const Checklist = mongoose.Schema({
     fatigue: {
         type: Boolean,
     },
+    breathing: {
+        type: Boolean,
+    },
     bodyAches: {
         type: Boolean,
     },
     headache: {
         type: Boolean,
     },
-    lossTastesSmell: {
+    smell: {
         type: Boolean
     },
-    soreThroat: {
+    sorethroat: {
         type: Boolean,
     },
-    runnyNose: {
+    runnynose: {
         type: Boolean,
     },
     vomiting: {
