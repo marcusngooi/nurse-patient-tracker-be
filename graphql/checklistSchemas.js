@@ -129,11 +129,6 @@ const Mutation = {
       });
 
       const savedChecklist = await checklist.save();
-
-      console.log(savedChecklist);
-
-      const user = await Patient.findById(userId);
-
       await Patient.updateOne(
         { _id: userId },
         {
@@ -143,7 +138,6 @@ const Mutation = {
         }
       );
 
-      console.log(user);
       return savedChecklist;
     },
   },
