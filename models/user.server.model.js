@@ -28,11 +28,9 @@ const User = mongoose.Schema({
   },
   vitals: [
     {
-      vital: {
-        type: [String],
-        ref: "vital",
-        default: [],
-      },
+      type: [String],
+      ref: "vital",
+      default: [],
     },
   ],
 });

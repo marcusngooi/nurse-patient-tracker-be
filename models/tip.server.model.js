@@ -10,5 +10,9 @@ const Tip = mongoose.Schema({
     type: String,
     trim: true,
   },
+  patient: {
+    type: String,
+    ref: "Patient"
+  }
 });
 module.exports = mongoose.model("Tip", Tip);

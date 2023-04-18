@@ -30,40 +30,61 @@ const userType = new GraphQLObjectType({
       password: {
         type: GraphQLString,
       },
+      firstName: {
+        type: GraphQLString,
+      },
+      lastName: {
+        type: GraphQLString,
+      },
       userType: {
         type: GraphQLString,
+      },
+      vitals: {
+        type: GraphQLList(GraphQLString),
       },
     };
   },
 });
 
 const queryType = {
-  // students: {
-  //   type: GraphQLList(studentType),
-  //   resolve: function () {
-  //     const students = StudentModel.find().exec();
-  //     if (!students) {
-  //       throw new Error("Error");
-  //     }
-  //     return students;
-  //   },
-  // },
-  // courseStudents: {
-  //   type: GraphQLList(studentType),
-  //   args: {
-  //     id: {
-  //       name: "id",
-  //       type: GraphQLString,
-  //     },
-  //   },
-  //   resolve: function (root, params) {
-  //     const courseStudents = CourseModel.findById(params.id).students.exec();
-  //     if (!courseStudents) {
-  //       throw new Error("Error finding course students!");
-  //     }
-  //     return courseStudents;
-  //   },
-  // },
+  users: {
+    type: GraphQLList(userType),
+    resolve: function () {
+      const users = UserModel.find().exec();
+      if (!users) {
+        throw new Error("Error");
+      }
+      return users;
+    },
+  },
+
+  user: {
+    type: userType,
+    args: {
+      id: {
+        name: "_id",
+        type: GraphQLString,
+      },
+    },
+    resolve: function (root, params) {
+      const userInfo = UserModel.findById(params.id).exec();
+      if (!userInfo) {
+        throw new Error("Error");
+      }
+      return userInfo;
+    },
+  },
+
+  patients: {
+    type: GraphQLList(userType),
+    resolve: function () {
+      const patients = UserModel.find({ userType: "patient" }).exec();
+      if (![patients]) {
+        throw new Error("Error");
+      }
+      return patients;
+    },
+  },
 
   isNurse: {
     type: GraphQLBoolean,
@@ -75,17 +96,19 @@ const queryType = {
       const decodedToken = jwt.decode(token);
       const userId = decodedToken.id;
       const user = await UserModel.findById(userId);
-      return user.userType == "Nurse";
+      return user.userType == "nurse";
     },
   },
 
   isSignedIn: {
     type: GraphQLBoolean,
-    resolve: function (root, params, context) {
+    resolve: (root, params, context) => {
       // Obtain the session token from the requests cookies,
       // which come with every request
       const token = context.req.cookies.token;
+      console.log(token);
       if (!token) {
+        console.log("this");
         return false;
       }
       try {
@@ -168,7 +191,7 @@ const Mutation = {
     resolve: async (root, params, context) => {
       const user = await UserModel.findOne({
         userName: params.userName,
-      }).exec();
+      });
       if (!user) {
         throw new Error("Error");
       }
@@ -181,14 +204,11 @@ const Mutation = {
 
       const token = jwt.sign({ id: user._id }, JWT_SECRET);
 
-      console.log(token);
-
-      context.res.cookie("token", token, {
+      await context.res.cookie("token", token, {
         maxAge: jwtExpirySeconds * 1000,
         httpOnly: true,
       });
 
-      // return user.email;
       return user; // use when testing in GraphiQL
     },
   },

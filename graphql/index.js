@@ -1,6 +1,6 @@
 // Group Project
 // Author:      Marcus Ngooi (301147411)
-// Description: Connect all schemas. 
+// Description: Connect all schemas.
 const GraphQLSchema = require("graphql").GraphQLSchema;
 const GraphQLObjectType = require("graphql").GraphQLObjectType;
 
@@ -8,11 +8,13 @@ const { userQuery, userMutation } = require("./userSchemas");
 const { vitalsQuery, vitalsMutation } = require("./vitalsSchemas");
 const { tipQuery, tipMutation } = require("./tipSchemas");
 
-const queryType = new GraphQLObjectType({  fields: function () {
+const queryType = new GraphQLObjectType({
+  name: "Query",
+  fields: function () {
     return {
       ...userQuery,
       ...vitalsQuery,
-      ...tipQuery
+      ...tipQuery,
     };
   },
 });
@@ -23,7 +25,7 @@ const mutation = new GraphQLObjectType({
     return {
       ...userMutation,
       ...vitalsMutation,
-      ...tipMutation
+      ...tipMutation,
     };
   },
 });

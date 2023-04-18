@@ -27,7 +27,7 @@ const tipType = new GraphQLObjectType({
 
 const queryType = {
     tip: {
-        tip: tipType,
+        type: tipType,
         args: {
             id: {
                 name: "_id",
@@ -39,7 +39,7 @@ const queryType = {
             if (!tipInfo) {
                 throw new Error("Error");
             }
-            return  tipInfo;
+            return tipInfo;
         },
     },
 };
