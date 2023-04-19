@@ -222,6 +222,13 @@ const Mutation = {
       return user; // use when testing in GraphiQL
     },
   },
+  signOut: {
+    type: GraphQLBoolean,
+    resolve: async (root, params, context) => {
+      context.res.clearCookie("token");
+      return true;
+    },
+  },
 };
 
 module.exports = {
