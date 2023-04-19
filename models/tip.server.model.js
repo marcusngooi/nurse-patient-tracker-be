@@ -1,4 +1,4 @@
-// Group Project
+// COMP308-402 Group Project-Group-4
 // Author(s):       Marcus Ngooi (301147411)
 //                  Ikamjot Hundal (301134374)
 // Description:     Tip model.

@@ -1,7 +1,11 @@
-// Group Project
-// Author:      Marcus Ngooi (301147411)
+// COMP308-402 Group Project-Group-4
+// Authors:     Marcus Ngooi (301147411)
 //              Ikamjot Hundal (301134374)
-// Description: GraphQL user Schema for user-related queries.
+//              Ben Coombes (301136902)
+//              Grant Macmillan (301129935)
+//              Gabriel Dias Tinoco
+//              Tatsiana Ptushko (301182173)
+// Description: GraphQL User Schema for user-queries.
 const GraphQLObjectType = require("graphql").GraphQLObjectType;
 const GraphQLList = require("graphql").GraphQLList;
 const GraphQLNonNull = require("graphql").GraphQLNonNull;
