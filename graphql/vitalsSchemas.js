@@ -94,24 +94,6 @@ const queryType = {
       return patientVitals;
     },
   },
-  /*
-  vital: {
-    type: vitalsType,
-    args: {
-      id: {
-        name: "_id",
-        type: GraphQLString,
-      },
-    },
-    resolve: function (root, params) {
-      const vitalsInfo = Vital.findById(params.id).exec();
-      if (!vitalsInfo) {
-        throw new Error("Error");
-      }
-      return vitalsInfo;
-    },
-  },
-  */
 };
 
 const Mutation = {
@@ -259,6 +241,7 @@ const Mutation = {
           weight: params.weight,
           bodyTemperature: params.bodyTemperature,
           heartRate: params.heartRate,
+          bloodPressure: params.bloodPressure,
           respiratoryRate: params.respiratoryRate,
         },
         function (err) {
