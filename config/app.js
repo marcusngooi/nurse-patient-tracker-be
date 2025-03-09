@@ -1,24 +1,15 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
+import express, { json, urlencoded } from "express";
 
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
+import morgan from "morgan";
+import cors from "cors";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import { connect, connection } from "mongoose";
 
-const session = require("express-session");
-const cookieParser = require("cookie-parser");
+import { URI, sessionSecret } from "./db";
 
-// Database
-const db = require("./db");
-const mongoose = require("mongoose");
-
-mongoose.connect(db.URI);
-const mongoDB = mongoose.connection;
+connect(URI);
+const mongoDB = connection;
 mongoDB.on("error", console.error.bind(console, "Connection Error:"));
 mongoDB.once("open", () => {
   console.log("Connected to MongoDB...");
@@ -27,8 +18,8 @@ mongoDB.once("open", () => {
 const app = express();
 
 app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -44,8 +35,8 @@ app.use(
   session({
     saveUninitialized: true,
     resave: true,
-    secret: db.sessionSecret,
+    secret: sessionSecret,
   })
 );
 
-module.exports = app;
+export default app;

@@ -1,39 +1,32 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: GraphQL Vital Schema for vitals-related queries.
+import {
+  GraphQLObjectType,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLID,
+  GraphQLInt,
+  GraphQLFloat,
+} from "graphql";
+import GraphQLDate from "graphql-date";
+import { decode } from "jsonwebtoken";
 
-const GraphQLObjectType = require("graphql").GraphQLObjectType;
-const GraphQLList = require("graphql").GraphQLList;
-const GraphQLNonNull = require("graphql").GraphQLNonNull;
-const GraphQLString = require("graphql").GraphQLString;
-const GraphQLID = require("graphql").GraphQLID;
-const mongoose = require("mongoose");
-const GraphQLInt = require("graphql").GraphQLInt;
-const GraphQLFloat = require("graphql").GraphQLFloat;
-const GraphQLDate = require("graphql-date");
+import Vital, {
+  find,
+  findByIdAndUpdate,
+  findById,
+  findByIdAndRemove,
+} from "../models/vital.server.model";
+import { findById as _findById, updateOne } from "../models/user.server.model";
 
-const Vital = require("../models/vital.server.model");
-const Patient = require("../models/user.server.model");
-
-const jwt = require("jsonwebtoken");
-const JWT_SECRET = "***REMOVED***";
-
-// Create a GraphQL Object Type for vitals model
 const vitalsType = new GraphQLObjectType({
   name: "vitals",
-  fields: function () {
+  fields: () => {
     return {
       _id: {
         type: GraphQLID,
       },
       patient: {
         type: GraphQLString,
-        // ref: "Patient",
       },
       date: {
         type: GraphQLDate,
@@ -60,8 +53,8 @@ const vitalsType = new GraphQLObjectType({
 const queryType = {
   vitals: {
     type: GraphQLList(vitalsType),
-    resolve: function () {
-      const vitals = Vital.find().exec();
+    resolve: () => {
+      const vitals = find().exec();
       if (!vitals) {
         throw new Error("Error");
       }
@@ -77,14 +70,13 @@ const queryType = {
         type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve: async (root, params) => {
-      console.log(1);
-      const patient = await Patient.findById(params.id);
+    resolve: async (params) => {
+      const patient = await _findById(params.id);
       const patientVitalIds = patient.vitals;
       if (!patientVitalIds || patientVitalIds.length === 0) {
         throw new Error("Error finding patient vitals IDs!");
       }
-      const patientVitals = await Vital.find({
+      const patientVitals = await find({
         _id: { $in: patientVitalIds },
       });
       if (!patientVitals || patientVitals.length === 0) {
@@ -116,11 +108,11 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLFloat),
       },
     },
-    resolve: async (root, params, context) => {
+    resolve: async (params, context) => {
       const token = context.req.cookies.token;
       let userId;
       if (token) {
-        const decodedToken = jwt.decode(token);
+        const decodedToken = decode(token);
         userId = decodedToken.id;
       } else {
         userId = params._id;
@@ -134,13 +126,7 @@ const Mutation = {
 
       const savedVitals = await vitals.save();
 
-      console.log(savedVitals);
-
-      const user = await Patient.findById(userId);
-
-      console.log(user);
-
-      await Patient.updateOne(
+      await updateOne(
         { _id: userId },
         {
           $push: {
@@ -175,7 +161,7 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLFloat),
       },
     },
-    resolve: async (root, params, context) => {
+    resolve: async (params) => {
       const patientId = params.id;
       const vitals = new Vital({
         patient: patientId,
@@ -189,13 +175,7 @@ const Mutation = {
 
       const savedVitals = await vitals.save();
 
-      console.log(savedVitals);
-
-      const user = await Patient.findById(patientId);
-
-      console.log(user);
-
-      await Patient.updateOne(
+      await updateOne(
         { _id: patientId },
         {
           $push: {
@@ -233,8 +213,8 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLFloat),
       },
     },
-    resolve(root, params) {
-      return Vital.findByIdAndUpdate(
+    resolve(params) {
+      return findByIdAndUpdate(
         params.id,
         {
           date: params.date,
@@ -244,7 +224,7 @@ const Mutation = {
           bloodPressure: params.bloodPressure,
           respiratoryRate: params.respiratoryRate,
         },
-        function (err) {
+        (err) => {
           if (err) return next(err);
         }
       );
@@ -258,12 +238,12 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve(root, params) {
-      const vitals = Vital.findById(params.id);
+    resolve(params) {
+      const vitals = findById(params.id);
       if (!vitals) {
         throw new Error("Error finding vitals for deletion!");
       }
-      const droppedVital = Vital.findByIdAndRemove(params.id).exec();
+      const droppedVital = findByIdAndRemove(params.id).exec();
       if (!droppedVital) {
         throw new Error("Error");
       }
@@ -272,7 +252,5 @@ const Mutation = {
   },
 };
 
-module.exports = {
-  vitalsQuery: queryType,
-  vitalsMutation: Mutation,
-};
+export const vitalsQuery = queryType;
+export const vitalsMutation = Mutation;

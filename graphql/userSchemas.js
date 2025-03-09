@@ -1,29 +1,26 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: GraphQL User Schema for user-queries.
-const GraphQLObjectType = require("graphql").GraphQLObjectType;
-const GraphQLList = require("graphql").GraphQLList;
-const GraphQLNonNull = require("graphql").GraphQLNonNull;
-const GraphQLString = require("graphql").GraphQLString;
-const GraphQLID = require("graphql").GraphQLID;
-const GraphQLInt = require("graphql").GraphQLInt;
-const GraphQLBoolean = require("graphql").GraphQLBoolean;
-const UserModel = require("../models/user.server.model");
+import {
+  GraphQLObjectType,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLID,
+  GraphQLBoolean,
+} from "graphql";
+import { decode, verify, JsonWebTokenError, sign } from "jsonwebtoken";
+import { hash, compare } from "bcrypt";
 
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const JWT_SECRET = "***REMOVED***";
-const jwtExpirySeconds = 3000;
+import UserModel, {
+  find,
+  findById,
+  findOne,
+} from "../models/user.server.model";
 
-// Create a GraphQL Object Type for User model
+const JWT_SECRET = process.env.JWT_SECRET;
+const jwtExpirySeconds = process.env.JWT_EXPIRY_SECONDS;
+
 const userType = new GraphQLObjectType({
   name: "user",
-  fields: function () {
+  fields: () => {
     return {
       _id: {
         type: GraphQLID,
@@ -56,8 +53,8 @@ const userType = new GraphQLObjectType({
 const queryType = {
   users: {
     type: GraphQLList(userType),
-    resolve: function () {
-      const users = UserModel.find().exec();
+    resolve: () => {
+      const users = find().exec();
       if (!users) {
         throw new Error("Error");
       }
@@ -73,8 +70,8 @@ const queryType = {
         type: GraphQLString,
       },
     },
-    resolve: function (root, params) {
-      const userInfo = UserModel.findById(params.id).exec();
+    resolve: (params) => {
+      const userInfo = findById(params.id).exec();
       if (!userInfo) {
         throw new Error("Error");
       }
@@ -84,8 +81,8 @@ const queryType = {
 
   patients: {
     type: GraphQLList(userType),
-    resolve: function () {
-      const patients = UserModel.find({ userType: "patient" }).exec();
+    resolve: () => {
+      const patients = find({ userType: "patient" }).exec();
       if (![patients]) {
         throw new Error("Error");
       }
@@ -95,23 +92,21 @@ const queryType = {
 
   isNurse: {
     type: GraphQLBoolean,
-    resolve: async (root, params, context) => {
+    resolve: async (context) => {
       const token = context.req.cookie.token;
       if (!token) {
         return false;
       }
-      const decodedToken = jwt.decode(token);
+      const decodedToken = decode(token);
       const userId = decodedToken.id;
-      const user = await UserModel.findById(userId);
+      const user = await findById(userId);
       return user.userType == "nurse";
     },
   },
 
   isSignedIn: {
     type: GraphQLBoolean,
-    resolve: (root, params, context) => {
-      // Obtain the session token from the requests cookies,
-      // which come with every request
+    resolve: (context) => {
       const token = context.req.cookies.token;
       console.log(token);
       if (!token) {
@@ -119,20 +114,13 @@ const queryType = {
         return false;
       }
       try {
-        // Parse the JWT string and store the result in `payload`.
-        // Note that we are passing the key in this method as well. This method will throw an error
-        // if the token is invalid (if it has expired according to the expiry time we set on sign in),
-        // or if the signature does not match
-        jwt.verify(token, JWT_SECRET);
+        verify(token, JWT_SECRET);
       } catch (e) {
-        if (e instanceof jwt.JsonWebTokenError) {
-          // the JWT is unauthorized, return a 401 error
+        if (e instanceof JsonWebTokenError) {
           return context.res.status(401).end();
         }
-        // otherwise, return a bad request error
         return context.res.status(400).end();
       }
-      // Finally, token is ok, return the username given in the token
       return true;
     },
   },
@@ -164,8 +152,8 @@ const Mutation = {
         type: GraphQLList(GraphQLString),
       },
     },
-    resolve: async (root, params, context) => {
-      const hashed = await bcrypt.hash(params.password, 10);
+    resolve: async (params, context) => {
+      const hashed = await hash(params.password, 10);
 
       const userModel = new UserModel({
         ...params,
@@ -177,7 +165,7 @@ const Mutation = {
         throw new Error("Error");
       }
 
-      const token = jwt.sign({ id: newUser._id }, JWT_SECRET);
+      const token = sign({ id: newUser._id }, JWT_SECRET);
 
       context.res.cookie("token", token, {
         maxAge: jwtExpirySeconds * 1000,
@@ -198,40 +186,38 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve: async (root, params, context) => {
-      const user = await UserModel.findOne({
+    resolve: async (params, context) => {
+      const user = await findOne({
         userName: params.userName,
       });
       if (!user) {
         throw new Error("Error");
       }
 
-      const valid = await bcrypt.compare(params.password, user.password);
+      const valid = await compare(params.password, user.password);
 
       if (!valid) {
         throw new Error("Error signing in");
       }
 
-      const token = jwt.sign({ id: user._id }, JWT_SECRET);
+      const token = sign({ id: user._id }, JWT_SECRET);
 
       await context.res.cookie("token", token, {
         maxAge: jwtExpirySeconds * 1000,
         httpOnly: true,
       });
 
-      return user; // use when testing in GraphiQL
+      return user;
     },
   },
   signOut: {
     type: GraphQLBoolean,
-    resolve: async (root, params, context) => {
+    resolve: async (context) => {
       context.res.clearCookie("token");
       return true;
     },
   },
 };
 
-module.exports = {
-  userQuery: queryType,
-  userMutation: Mutation,
-};
+export const userQuery = queryType;
+export const userMutation = Mutation;

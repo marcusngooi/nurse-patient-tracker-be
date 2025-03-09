@@ -1,24 +1,15 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: index Schema.
-const GraphQLSchema = require("graphql").GraphQLSchema;
-const GraphQLObjectType = require("graphql").GraphQLObjectType;
+import { GraphQLSchema, GraphQLObjectType } from "graphql";
 
-const { userQuery, userMutation } = require("./userSchemas");
-const { vitalsQuery, vitalsMutation } = require("./vitalsSchemas");
-const { tipQuery, tipMutation } = require("./tipSchemas");
-const { alertQuery, alertMutation } = require("./alertSchemas");
-const { aiQuery } = require("./aiSchemas");
-const { checklistQuery, checklistMutation } = require("./checklistSchemas");
+import { userQuery, userMutation } from "./userSchemas";
+import { vitalsQuery, vitalsMutation } from "./vitalsSchemas";
+import { tipQuery, tipMutation } from "./tipSchemas";
+import { alertQuery, alertMutation } from "./alertSchemas";
+import { aiQuery } from "./aiSchemas";
+import { checklistQuery, checklistMutation } from "./checklistSchemas";
 
 const queryType = new GraphQLObjectType({
   name: "Query",
-  fields: function () {
+  fields: () => {
     return {
       ...userQuery,
       ...vitalsQuery,
@@ -32,7 +23,7 @@ const queryType = new GraphQLObjectType({
 
 const mutation = new GraphQLObjectType({
   name: "Mutation",
-  fields: function () {
+  fields: () => {
     return {
       ...userMutation,
       ...vitalsMutation,
@@ -43,4 +34,4 @@ const mutation = new GraphQLObjectType({
   },
 });
 
-module.exports = new GraphQLSchema({ query: queryType, mutation: mutation });
+export default new GraphQLSchema({ query: queryType, mutation: mutation });

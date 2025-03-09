@@ -1,14 +1,10 @@
-// COMP308-402 Group Project-Group-4
-// Author(s):       Marcus Ngooi (301147411)
-//                  Ikamjot Hundal (301134374)
-// Description:     Tip model.
+import { Schema, model } from "mongoose";
 
-const mongoose = require("mongoose");
-
-const Tip = mongoose.Schema({
+const Tip = Schema({
   message: {
     type: String,
     trim: true,
   },
 });
-module.exports = mongoose.model("Tip", Tip);
+
+export default model("Tip", Tip);

@@ -1,9 +1,5 @@
-// Group Project
-// Author:      Marcus Ngooi (301147411)
-// Description: Configure database.
+const URI = process.env.DB_URI;
+const sessionSecret = process.env.DB_SESSION_SECRET;
+const secretKey = process.env.DB_SECRET_KEY;
 
-module.exports = {
-    URI: '***REMOVED***',
-    sessionSecret: '***REMOVED***', // Not sure whether this is needed
-    secretKey: '***REMOVED***' // Not sure whether this is needed
-}
+export { URI, sessionSecret, secretKey };

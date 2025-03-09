@@ -1,15 +1,6 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description:     User model.
+import { Schema, model } from "mongoose";
 
-const mongoose = require("mongoose");
-
-const User = mongoose.Schema({
+const User = Schema({
   userName: {
     type: String,
     trim: true,
@@ -46,10 +37,4 @@ const User = mongoose.Schema({
   ],
 });
 
-// // Configure the 'Student' to use getters and virtuals when transforming to JSON
-// Student.set("toJSON", {
-//   getters: true,
-//   virtuals: true,
-// });
-
-module.exports = mongoose.model("User", User);
+export default model("User", User);

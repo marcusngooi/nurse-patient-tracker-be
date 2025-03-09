@@ -1,25 +1,16 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: Alert Schema.
-const GraphQLObjectType = require("graphql").GraphQLObjectType;
-const GraphQLList = require("graphql").GraphQLList;
-const GraphQLNonNull = require("graphql").GraphQLNonNull;
-const GraphQLString = require("graphql").GraphQLString;
-const GraphQLID = require("graphql").GraphQLID;
-const mongoose = require("mongoose");
+import {
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLID,
+} from "graphql";
+import { decode } from "jsonwebtoken";
 
-const Alert = require("../models/alert.server.model");
-
-const jwt = require("jsonwebtoken");
+import Alert, { findById, findOne } from "../models/alert.server.model";
 
 const alertType = new GraphQLObjectType({
   name: "alert",
-  fields: function () {
+  fields: () => {
     return {
       _id: {
         type: GraphQLID,
@@ -43,8 +34,8 @@ const queryType = {
         type: GraphQLString,
       },
     },
-    resolve: function (root, params) {
-      const alertInfo = Alert.findById(params.id).exec();
+    resolve: (params) => {
+      const alertInfo = findById(params.id).exec();
       if (!alertInfo) {
         throw new Error("Error");
       }
@@ -62,11 +53,11 @@ const Mutation = {
       },
     },
 
-    resolve: async (root, params, context) => {
+    resolve: async (params, context) => {
       const token = context.req.cookies.token;
-      const decodedToken = jwt.decode(token);
+      const decodedToken = decode(token);
       const userId = decodedToken.id;
-      let alert = await Alert.findOne({ message: params.message });
+      let alert = await findOne({ message: params.message });
       if (!alert) {
         const alertModel = new Alert({ patient: userId, ...params });
         alert = await alertModel.save().then((alertDoc) => alertDoc.toObject());
@@ -80,7 +71,5 @@ const Mutation = {
   },
 };
 
-module.exports = {
-  alertQuery: queryType,
-  alertMutation: Mutation,
-};
+export const alertQuery = queryType;
+export const alertMutation = Mutation;

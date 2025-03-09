@@ -1,27 +1,18 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: CheckList Schema.
-const GraphQLObjectType = require("graphql").GraphQLObjectType;
-const GraphQLList = require("graphql").GraphQLList;
-const GraphQLNonNull = require("graphql").GraphQLNonNull;
-const GraphQLString = require("graphql").GraphQLString;
-const GraphQLID = require("graphql").GraphQLID;
-const GraphQLBoolean = require("graphql").GraphQLBoolean;
-const mongoose = require("mongoose");
+import {
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLID,
+  GraphQLBoolean,
+} from "graphql";
+import { decode } from "jsonwebtoken";
 
-const Checklist = require("../models/checklist.server.model");
-const Patient = require("../models/user.server.model");
-
-const jwt = require("jsonwebtoken");
+import Checklist, { findById } from "../models/checklist.server.model";
+import { updateOne } from "../models/user.server.model";
 
 const checklistType = new GraphQLObjectType({
   name: "checklist",
-  fields: function () {
+  fields: () => {
     return {
       _id: {
         type: GraphQLID,
@@ -75,8 +66,8 @@ const queryType = {
         type: GraphQLString,
       },
     },
-    resolve: function (root, params) {
-      const checklistInfo = Checklist.findById(params.id).exec();
+    resolve: (params) => {
+      const checklistInfo = findById(params.id).exec();
       if (!checklistInfo) {
         throw new Error("Error");
       }
@@ -124,10 +115,10 @@ const Mutation = {
       },
     },
 
-    resolve: async (root, params, context) => {
+    resolve: async (params, context) => {
       const token = context.req.cookies.token;
       let userId;
-      const decodedToken = jwt.decode(token);
+      const decodedToken = decode(token);
       userId = decodedToken.id;
 
       const checklist = new Checklist({
@@ -137,7 +128,7 @@ const Mutation = {
       });
 
       const savedChecklist = await checklist.save();
-      await Patient.updateOne(
+      await updateOne(
         { _id: userId },
         {
           $push: {
@@ -151,7 +142,5 @@ const Mutation = {
   },
 };
 
-module.exports = {
-  checklistQuery: queryType,
-  checklistMutation: Mutation,
-};
+export const checklistQuery = queryType;
+export const checklistMutation = Mutation;

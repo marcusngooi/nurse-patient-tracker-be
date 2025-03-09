@@ -1,22 +1,14 @@
-// COMP308-402 Group Project-Group-4
-// Authors:     Marcus Ngooi (301147411)
-//              Ikamjot Hundal (301134374)
-//              Ben Coombes (301136902)
-//              Grant Macmillan (301129935)
-//              Gabriel Dias Tinoco
-//              Tatsiana Ptushko (301182173)
-// Description: AI Schema.
-
-const { GraphQLObjectType } = require("graphql");
-const GraphQLList = require("graphql").GraphQLList;
-const GraphQLString = require("graphql").GraphQLString;
-const GraphQLFloat = require("graphql").GraphQLFloat;
-// const GraphQLInt = require("graphql").GraphQLInt;
-const GraphQLNonNull = require("graphql").GraphQLNonNull;
+import {
+  GraphQLObjectType,
+  GraphQLList,
+  GraphQLString,
+  GraphQLFloat,
+  GraphQLNonNull,
+} from "graphql";
 
 const resultsType = new GraphQLObjectType({
   name: "results",
-  fields: function () {
+  fields: ()=> {
     return {
       resultsArray: {
         type: GraphQLList(GraphQLFloat),
@@ -28,7 +20,6 @@ const resultsType = new GraphQLObjectType({
 const queryType = {
   hepatitisStatus: {
     type: resultsType,
-    // type: GraphQLList(GraphQLFloat),
     args: {
       age: {
         type: new GraphQLNonNull(GraphQLString),
@@ -88,7 +79,7 @@ const queryType = {
         type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve: async (root, params, context) => {
+    resolve: async (params) => {
       const tf = require("@tensorflow/tfjs");
       require("@tensorflow/tfjs-node");
       const path = require("path");
@@ -144,7 +135,7 @@ const queryType = {
       results.print();
       const resultsArray = await results.array();
       console.log(resultsArray);
-      var resultForData1 = resultsArray[0];
+      const resultForData1 = resultsArray[0];
       const dataToSend = {
         resultsArray: resultForData1,
       };
@@ -154,6 +145,4 @@ const queryType = {
   },
 };
 
-module.exports = {
-  aiQuery: queryType,
-};
+export const aiQuery = queryType;
