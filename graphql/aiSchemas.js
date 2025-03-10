@@ -8,7 +8,7 @@ import {
 
 const resultsType = new GraphQLObjectType({
   name: "results",
-  fields: ()=> {
+  fields: () => {
     return {
       resultsArray: {
         type: GraphQLList(GraphQLFloat),
