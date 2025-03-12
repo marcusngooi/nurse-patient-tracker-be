@@ -1,14 +1,24 @@
 #!/usr/bin/env node
 
-import { graphqlHTTP } from "express-graphql";
-import schema from "./graphql/index";
-
-import app, { set, use } from "./config/app";
-const debug = require("debug")("group4comp308project:server");
 import { createServer } from "http";
+import { graphqlHTTP } from "express-graphql";
+import cors from "cors";
 
+import schema from "./graphql/index";
+import app, { set, use } from "./config/app";
+import config from "../config/config.js";
+
+const debug = require("debug")("group4comp308project:server");
 const port = process.env.PORT || "4000";
+
 set("port", port);
+
+app.use(
+  cors({
+    origin: config.corsOrigin,
+    credentials: true,
+  })
+);
 
 use(
   "/graphql",
@@ -63,12 +73,10 @@ function onError(error) {
  */
 
 function onListening() {
-  let addr = server.address();
-  let bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   console.log(
-    `Express GraphQL Server is running on http://localhost:${port}/graphql...`
+    `Express GraphQL Server is running on ${config.nodeEnv} mode on port ${config.port}`
   );
   debug(
-    `Express GraphQL Server is running on http://localhost:${port}/graphql...`
+    `Express GraphQL Server is running on ${config.nodeEnv} mode on port ${config.port}`
   );
 }
