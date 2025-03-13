@@ -11,7 +11,7 @@ const resultsType = new GraphQLObjectType({
   fields: () => {
     return {
       resultsArray: {
-        type: GraphQLList(GraphQLFloat),
+        type: new GraphQLList(GraphQLFloat),
       },
     };
   },

@@ -8,15 +8,10 @@ import {
   GraphQLFloat,
 } from "graphql";
 import GraphQLDate from "graphql-date";
-import { decode } from "jsonwebtoken";
+import JWT from "jsonwebtoken";
 
-import Vital, {
-  find,
-  findByIdAndUpdate,
-  findById,
-  findByIdAndRemove,
-} from "../models/vital.server.model";
-import { findById as _findById, updateOne } from "../models/user.server.model";
+import Vital from "../models/vital.server.model.js";
+import User from "../models/user.server.model.js";
 
 const vitalsType = new GraphQLObjectType({
   name: "vitals",
@@ -52,9 +47,9 @@ const vitalsType = new GraphQLObjectType({
 
 const queryType = {
   vitals: {
-    type: GraphQLList(vitalsType),
+    type: new GraphQLList(vitalsType),
     resolve: () => {
-      const vitals = find().exec();
+      const vitals = Vital.find().exec();
       if (!vitals) {
         throw new Error("Error");
       }
@@ -63,7 +58,7 @@ const queryType = {
   },
 
   patientVitalsAsNurse: {
-    type: GraphQLList(vitalsType),
+    type: new GraphQLList(vitalsType),
     args: {
       id: {
         name: "id",
@@ -71,12 +66,12 @@ const queryType = {
       },
     },
     resolve: async (params) => {
-      const patient = await _findById(params.id);
+      const patient = await User.findById(params.id);
       const patientVitalIds = patient.vitals;
       if (!patientVitalIds || patientVitalIds.length === 0) {
         throw new Error("Error finding patient vitals IDs!");
       }
-      const patientVitals = await find({
+      const patientVitals = await Vital.find({
         _id: { $in: patientVitalIds },
       });
       if (!patientVitals || patientVitals.length === 0) {
@@ -112,7 +107,7 @@ const Mutation = {
       const token = context.req.cookies.token;
       let userId;
       if (token) {
-        const decodedToken = decode(token);
+        const decodedToken = JWT.decode(token);
         userId = decodedToken.id;
       } else {
         userId = params._id;
@@ -126,7 +121,7 @@ const Mutation = {
 
       const savedVitals = await vitals.save();
 
-      await updateOne(
+      await User.updateOne(
         { _id: userId },
         {
           $push: {
@@ -175,7 +170,7 @@ const Mutation = {
 
       const savedVitals = await vitals.save();
 
-      await updateOne(
+      await User.updateOne(
         { _id: patientId },
         {
           $push: {
@@ -214,7 +209,7 @@ const Mutation = {
       },
     },
     resolve(params) {
-      return findByIdAndUpdate(
+      return Vital.findByIdAndUpdate(
         params.id,
         {
           date: params.date,
@@ -239,11 +234,11 @@ const Mutation = {
       },
     },
     resolve(params) {
-      const vitals = findById(params.id);
+      const vitals = Vital.findById(params.id);
       if (!vitals) {
         throw new Error("Error finding vitals for deletion!");
       }
-      const droppedVital = findByIdAndRemove(params.id).exec();
+      const droppedVital = Vital.findByIdAndRemove(params.id).exec();
       if (!droppedVital) {
         throw new Error("Error");
       }

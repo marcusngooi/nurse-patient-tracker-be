@@ -6,7 +6,7 @@ import {
 } from "graphql";
 import { decode } from "jsonwebtoken";
 
-import Alert, { findById, findOne } from "../models/alert.server.model";
+import Alert from "../models/alert.server.model.js";
 
 const alertType = new GraphQLObjectType({
   name: "alert",
@@ -35,7 +35,7 @@ const queryType = {
       },
     },
     resolve: (params) => {
-      const alertInfo = findById(params.id).exec();
+      const alertInfo = Alert.findById(params.id).exec();
       if (!alertInfo) {
         throw new Error("Error");
       }
@@ -57,7 +57,7 @@ const Mutation = {
       const token = context.req.cookies.token;
       const decodedToken = decode(token);
       const userId = decodedToken.id;
-      let alert = await findOne({ message: params.message });
+      let alert = await Alert.findOne({ message: params.message });
       if (!alert) {
         const alertModel = new Alert({ patient: userId, ...params });
         alert = await alertModel.save().then((alertDoc) => alertDoc.toObject());

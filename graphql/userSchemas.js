@@ -6,14 +6,10 @@ import {
   GraphQLID,
   GraphQLBoolean,
 } from "graphql";
-import { decode, verify, JsonWebTokenError, sign } from "jsonwebtoken";
-import { hash, compare } from "bcrypt";
+import JWT from "jsonwebtoken";
+import * as bcrypt from "bcrypt";
 
-import UserModel, {
-  find,
-  findById,
-  findOne,
-} from "../models/user.server.model";
+import UserModel from "../models/user.server.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const jwtExpirySeconds = process.env.JWT_EXPIRY_SECONDS;
@@ -41,10 +37,10 @@ const userType = new GraphQLObjectType({
         type: GraphQLString,
       },
       vitals: {
-        type: GraphQLList(GraphQLString),
+        type: new GraphQLList(GraphQLString),
       },
       checklists: {
-        type: GraphQLList(GraphQLString),
+        type: new GraphQLList(GraphQLString),
       },
     };
   },
@@ -52,9 +48,9 @@ const userType = new GraphQLObjectType({
 
 const queryType = {
   users: {
-    type: GraphQLList(userType),
+    type: new GraphQLList(userType),
     resolve: () => {
-      const users = find().exec();
+      const users = UserModel.find().exec();
       if (!users) {
         throw new Error("Error");
       }
@@ -71,7 +67,7 @@ const queryType = {
       },
     },
     resolve: (params) => {
-      const userInfo = findById(params.id).exec();
+      const userInfo = UserModel.findById(params.id).exec();
       if (!userInfo) {
         throw new Error("Error");
       }
@@ -80,9 +76,9 @@ const queryType = {
   },
 
   patients: {
-    type: GraphQLList(userType),
+    type: new GraphQLList(userType),
     resolve: () => {
-      const patients = find({ userType: "patient" }).exec();
+      const patients = UserModel.find({ userType: "patient" }).exec();
       if (![patients]) {
         throw new Error("Error");
       }
@@ -97,9 +93,9 @@ const queryType = {
       if (!token) {
         return false;
       }
-      const decodedToken = decode(token);
+      const decodedToken = JWT.decode(token);
       const userId = decodedToken.id;
-      const user = await findById(userId);
+      const user = await UserModel.findById(userId);
       return user.userType == "nurse";
     },
   },
@@ -114,7 +110,7 @@ const queryType = {
         return false;
       }
       try {
-        verify(token, JWT_SECRET);
+        JWT.verify(token, JWT_SECRET);
       } catch (e) {
         if (e instanceof JsonWebTokenError) {
           return context.res.status(401).end();
@@ -146,14 +142,14 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLString),
       },
       vitals: {
-        type: GraphQLList(GraphQLString),
+        type: new GraphQLList(GraphQLString),
       },
       checklists: {
-        type: GraphQLList(GraphQLString),
+        type: new GraphQLList(GraphQLString),
       },
     },
     resolve: async (params, context) => {
-      const hashed = await hash(params.password, 10);
+      const hashed = await bcrypt.hash(params.password, 10);
 
       const userModel = new UserModel({
         ...params,
@@ -165,7 +161,7 @@ const Mutation = {
         throw new Error("Error");
       }
 
-      const token = sign({ id: newUser._id }, JWT_SECRET);
+      const token = JWT.sign({ id: newUser._id }, JWT_SECRET);
 
       context.res.cookie("token", token, {
         maxAge: jwtExpirySeconds * 1000,
@@ -187,20 +183,20 @@ const Mutation = {
       },
     },
     resolve: async (params, context) => {
-      const user = await findOne({
+      const user = await UserModel.findOne({
         userName: params.userName,
       });
       if (!user) {
         throw new Error("Error");
       }
 
-      const valid = await compare(params.password, user.password);
+      const valid = await bcrypt.compare(params.password, user.password);
 
       if (!valid) {
         throw new Error("Error signing in");
       }
 
-      const token = sign({ id: user._id }, JWT_SECRET);
+      const token = JWT.sign({ id: user._id }, JWT_SECRET);
 
       await context.res.cookie("token", token, {
         maxAge: jwtExpirySeconds * 1000,

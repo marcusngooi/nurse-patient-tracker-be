@@ -4,12 +4,12 @@ import morgan from "morgan";
 import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
-import { connect, connection } from "mongoose";
+import mongoose from "mongoose";
 
-import { URI, sessionSecret } from "./db";
+import { URI, sessionSecret } from "./db.js";
 
-connect(URI);
-const mongoDB = connection;
+mongoose.connect(URI);
+const mongoDB = mongoose.connection;
 mongoDB.on("error", console.error.bind(console, "Connection Error:"));
 mongoDB.once("open", () => {
   console.log("Connected to MongoDB...");
@@ -21,7 +21,7 @@ app.use(morgan("dev"));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use((req, res, next) => {
+app.use((res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header("Access-Control-Allow-Credentials", true);
   res.header(
@@ -34,8 +34,9 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(
   session({
     saveUninitialized: true,
-    resave: true,
+    resave: false,
     secret: sessionSecret,
+    cookie: { secure: process.env.NODE_ENV === "production" },
   })
 );
 

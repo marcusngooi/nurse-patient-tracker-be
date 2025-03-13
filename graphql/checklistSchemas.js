@@ -7,8 +7,8 @@ import {
 } from "graphql";
 import { decode } from "jsonwebtoken";
 
-import Checklist, { findById } from "../models/checklist.server.model";
-import { updateOne } from "../models/user.server.model";
+import Checklist from "../models/checklist.server.model.js";
+import User from "../models/user.server.model.js";
 
 const checklistType = new GraphQLObjectType({
   name: "checklist",
@@ -67,7 +67,7 @@ const queryType = {
       },
     },
     resolve: (params) => {
-      const checklistInfo = findById(params.id).exec();
+      const checklistInfo = Checklist.findById(params.id).exec();
       if (!checklistInfo) {
         throw new Error("Error");
       }
@@ -81,37 +81,37 @@ const Mutation = {
     type: checklistType,
     args: {
       fever: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       cough: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       fatigue: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       breathing: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       bodyaches: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       headache: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       smell: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       sorethroat: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       runnynose: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       vomiting: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       diarrhea: {
-        type: GraphQLNonNull(GraphQLBoolean),
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
     },
 
@@ -128,7 +128,7 @@ const Mutation = {
       });
 
       const savedChecklist = await checklist.save();
-      await updateOne(
+      await User.updateOne(
         { _id: userId },
         {
           $push: {

@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
 import { createServer } from "http";
-import { graphqlHTTP } from "express-graphql";
+import { createHandler } from "graphql-http/lib/use/express";
 import cors from "cors";
+import debug from "debug";
 
-import schema from "./graphql/index";
-import app, { set, use } from "./config/app";
-import config from "../config/config.js";
+import app from "./config/app.js";
+import config from "./config/config.js";
+import schema from "./graphql/index.js";
 
-const debug = require("debug")("group4comp308project:server");
+const serverDebug = debug("group4comp308project:server");
 const port = process.env.PORT || "4000";
 
-set("port", port);
+app.set("port", port);
 
 app.use(
   cors({
@@ -20,18 +21,15 @@ app.use(
   })
 );
 
-use(
+app.use(
   "/graphql",
-  graphqlHTTP((request, response) => {
-    return {
-      schema: schema,
-      rootValue: global,
-      graphiql: true,
-      context: {
-        req: request,
-        res: response,
-      },
-    };
+  createHandler({
+    schema: schema,
+    rootValue: global,
+    context: (req, res) => ({
+      req,
+      res,
+    }),
   })
 );
 

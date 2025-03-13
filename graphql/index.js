@@ -1,11 +1,11 @@
 import { GraphQLSchema, GraphQLObjectType } from "graphql";
 
-import { userQuery, userMutation } from "./userSchemas";
-import { vitalsQuery, vitalsMutation } from "./vitalsSchemas";
-import { tipQuery, tipMutation } from "./tipSchemas";
-import { alertQuery, alertMutation } from "./alertSchemas";
-import { aiQuery } from "./aiSchemas";
-import { checklistQuery, checklistMutation } from "./checklistSchemas";
+import { userQuery, userMutation } from "./userSchemas.js";
+import { vitalsQuery, vitalsMutation } from "./vitalsSchemas.js";
+import { tipQuery, tipMutation } from "./tipSchemas.js";
+import { alertQuery, alertMutation } from "./alertSchemas.js";
+import { aiQuery } from "./aiSchemas.js";
+import { checklistQuery, checklistMutation } from "./checklistSchemas.js";
 
 const queryType = new GraphQLObjectType({
   name: "Query",

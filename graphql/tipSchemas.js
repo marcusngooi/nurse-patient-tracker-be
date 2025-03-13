@@ -5,7 +5,7 @@ import {
   GraphQLID,
 } from "graphql";
 
-import Tip, { find, findOne } from "../models/tip.server.model";
+import Tip from "../models/tip.server.model.js";
 
 const tipType = new GraphQLObjectType({
   name: "tip",
@@ -25,7 +25,7 @@ const queryType = {
   tip: {
     type: tipType,
     resolve: async () => {
-      const tips = await find();
+      const tips = await Tip.find();
       console.log(tips);
       if (!tips) {
         throw new Error("Error");
@@ -48,7 +48,7 @@ const Mutation = {
     },
 
     resolve: async (params) => {
-      let tip = await findOne({ message: params.message });
+      let tip = await Tip.findOne({ message: params.message });
       if (!tip) {
         const tipModel = new Tip(params);
         tip = await tipModel.save().then((tipDoc) => tipDoc.toObject());
