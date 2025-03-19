@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const config = {
   development: {
-    port: 4000,
+    port: process.env.PORT || 4000,
     corsOrigin: "http://localhost:3000",
     nodeEnv: "development",
   },

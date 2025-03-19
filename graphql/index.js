@@ -34,4 +34,6 @@ const mutation = new GraphQLObjectType({
   },
 });
 
-export default new GraphQLSchema({ query: queryType, mutation: mutation });
+const schema = new GraphQLSchema({ query: queryType, mutation: mutation });
+
+export default schema;

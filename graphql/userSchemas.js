@@ -7,12 +7,9 @@ import {
   GraphQLBoolean,
 } from "graphql";
 import JWT from "jsonwebtoken";
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 
 import UserModel from "../models/user.server.model.js";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const jwtExpirySeconds = process.env.JWT_EXPIRY_SECONDS;
 
 const userType = new GraphQLObjectType({
   name: "user",
@@ -88,36 +85,39 @@ const queryType = {
 
   isNurse: {
     type: GraphQLBoolean,
-    resolve: async (context) => {
+    resolve: async (_, __, context) => {
       const token = context.req.cookie.token;
       if (!token) {
+        console.log("User is not a nurse.");
         return false;
       }
-      const decodedToken = JWT.decode(token);
-      const userId = decodedToken.id;
-      const user = await UserModel.findById(userId);
-      return user.userType == "nurse";
+      try {
+        const decodedToken = JWT.decode(token, process.env.JWT_SECRET);
+        const userId = decodedToken.id;
+        const user = await UserModel.findById(userId);
+        return user.userType === "nurse";
+      } catch (err) {
+        console.error("Error verifying token or fetching user:", e);
+        return false;
+      }
     },
   },
 
   isSignedIn: {
     type: GraphQLBoolean,
-    resolve: (context) => {
+    resolve: (_, __, context) => {
       const token = context.req.cookies.token;
       console.log(token);
       if (!token) {
-        console.log("this");
         return false;
       }
       try {
-        JWT.verify(token, JWT_SECRET);
-      } catch (e) {
-        if (e instanceof JsonWebTokenError) {
-          return context.res.status(401).end();
-        }
-        return context.res.status(400).end();
+        JWT.verify(token, process.env.JWT_SECRET);
+        return true;
+      } catch (err) {
+        console.error("Token verification failed:", e);
+        return false;
       }
-      return true;
     },
   },
 };
@@ -148,26 +148,27 @@ const Mutation = {
         type: new GraphQLList(GraphQLString),
       },
     },
-    resolve: async (params, context) => {
-      const hashed = await bcrypt.hash(params.password, 10);
-
+    resolve: async (_, args, context) => {
+      const salt = await bcrypt.genSalt(10);
+      if (!args.password) {
+        throw new Error("Missing required user password.");
+      }
+      const hashed = await bcrypt.hash(args.password, salt);
+      if (!hashed) {
+        throw new Error("Failed to hash password.");
+      }
       const userModel = new UserModel({
-        ...params,
+        ...args,
         password: hashed,
       });
-
       const newUser = await userModel.save();
       if (!newUser) {
-        throw new Error("Error");
+        throw new Error("Failed to save new user.");
       }
-
-      const token = JWT.sign({ id: newUser._id }, JWT_SECRET);
-
-      context.res.cookie("token", token, {
-        maxAge: jwtExpirySeconds * 1000,
-        httpOnly: true,
+      const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      context.setCookie("token", token, {
+        maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
-
       return newUser;
     },
   },
@@ -182,25 +183,24 @@ const Mutation = {
         type: new GraphQLNonNull(GraphQLString),
       },
     },
-    resolve: async (params, context) => {
+    resolve: async (_, args, context) => {
       const user = await UserModel.findOne({
-        userName: params.userName,
+        userName: args.userName,
       });
       if (!user) {
-        throw new Error("Error");
+        throw new Error("The user you entered does not exist.");
       }
 
-      const valid = await bcrypt.compare(params.password, user.password);
+      const valid = await bcrypt.compare(args.password, user.password);
 
       if (!valid) {
-        throw new Error("Error signing in");
+        throw new Error("The password you entered is incorrect.");
       }
 
-      const token = JWT.sign({ id: user._id }, JWT_SECRET);
+      const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET);
 
-      await context.res.cookie("token", token, {
-        maxAge: jwtExpirySeconds * 1000,
-        httpOnly: true,
+      context.setCookie("token", token, {
+        maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
 
       return user;
@@ -208,8 +208,8 @@ const Mutation = {
   },
   signOut: {
     type: GraphQLBoolean,
-    resolve: async (context) => {
-      context.res.clearCookie("token");
+    resolve: async (_, __, context) => {
+      context.setCookie("token", "", { maxAge: 0 });
       return true;
     },
   },
