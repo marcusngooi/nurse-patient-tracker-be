@@ -47,10 +47,10 @@ const Mutation = {
       },
     },
 
-    resolve: async (params) => {
-      let tip = await Tip.findOne({ message: params.message });
+    resolve: async (_, args) => {
+      let tip = await Tip.findOne({ message: args.message });
       if (!tip) {
-        const tipModel = new Tip(params);
+        const tipModel = new Tip(args);
         tip = await tipModel.save().then((tipDoc) => tipDoc.toObject());
         if (!tip) {
           throw new Error("Error saving the Tip!");
