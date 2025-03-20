@@ -10,7 +10,7 @@ const onError = (error) => {
     throw error;
   }
 
-  let bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+  let bind = typeof process.env.PORT === "string" ? "Pipe " + process.env.PORT : "Port " + process.env.PORT;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {

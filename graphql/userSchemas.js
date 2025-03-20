@@ -166,7 +166,7 @@ const Mutation = {
         throw new Error("Failed to save new user.");
       }
       const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      context.setCookie("token", token, {
+      context.res.cookie("token", token, {
         maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
       return newUser;
@@ -199,7 +199,7 @@ const Mutation = {
 
       const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET);
 
-      context.setCookie("token", token, {
+      context.res.cookie("token", token, {
         maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
 
@@ -209,7 +209,7 @@ const Mutation = {
   signOut: {
     type: GraphQLBoolean,
     resolve: async (_, __, context) => {
-      context.setCookie("token", "", { maxAge: 0 });
+      context.res.cookie("token", "", { maxAge: 0 });
       return true;
     },
   },

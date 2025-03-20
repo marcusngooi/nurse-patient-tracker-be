@@ -4,10 +4,11 @@ import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
-import { createHandler } from "graphql-http/lib/use/express";
 
 import config from "./config.js";
 import schema from "../graphql/index.js";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
 
 const app = express();
 
@@ -37,50 +38,27 @@ app.use(
   })
 );
 
-app.use(
-  "/graphql",
-  createHandler({
-    schema: schema,
-    rootValue: global,
-    context: (req, res) => {
-      // Create cookie handler
-      const setCookie = (res, name, value, options = {}) => {
-        const defaultOptions = {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          maxAge: 24 * 60 * 60 * 1000, // 24 hours
-          sameSite: "strict",
-          path: "/",
-        };
-        const cookieOptions = { ...defaultOptions, ...options };
-        let cookieString = `${name}=${value}`;
-        if (cookieOptions.httpOnly) cookieString += "; HttpOnly";
-        if (cookieOptions.secure) cookieString += "; Secure";
-        if (cookieOptions.maxAge)
-          cookieString += `; Max-Age=${cookieOptions.maxAge / 1000}`;
-        if (cookieOptions.sameSite)
-          cookieString += `; SameSite=${cookieOptions.sameSite}`;
-        if (cookieOptions.path) cookieString += `; Path=${cookieOptions.path}`;
+const startApolloServer = async () => {
+  const server = new ApolloServer({
+    schema,
+  });
+  await server.start();
 
-        // Ensure the headers property exists
-        if (!res.headers) {
-          res.headers = {};
-        }
-
-        // Add the Set-Cookie header
-        if (!res.headers["Set-Cookie"]) {
-          res.headers["Set-Cookie"] = [];
-        }
-        res.headers["Set-Cookie"].push(cookieString);
-      };
-      return {
+  app.use(
+    "/graphql",
+    cors({
+      origin: config.corsOrigin,
+      credentials: true,
+    }),
+    expressMiddleware(server, {
+      context: async ({ req, res }) => ({
         req,
         res,
-        setCookie: (name, value, options) =>
-          setCookie(res, name, value, options),
-      };
-    },
-  })
-);
+      }),
+    })
+  );
+};
+
+startApolloServer().catch(console.error);
 
 export default app;

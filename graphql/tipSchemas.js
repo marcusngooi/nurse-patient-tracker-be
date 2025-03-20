@@ -26,7 +26,6 @@ const queryType = {
     type: tipType,
     resolve: async () => {
       const tips = await Tip.find();
-      console.log(tips);
       if (!tips) {
         throw new Error("Error");
       }

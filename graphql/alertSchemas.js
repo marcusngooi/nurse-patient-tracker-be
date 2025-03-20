@@ -4,6 +4,7 @@ import {
   GraphQLString,
   GraphQLID,
 } from "graphql";
+import cookie from "cookie";
 import { decode } from "jsonwebtoken";
 
 import Alert from "../models/alert.server.model.js";
@@ -34,10 +35,10 @@ const queryType = {
         type: GraphQLString,
       },
     },
-    resolve: (params) => {
-      const alertInfo = Alert.findById(params.id).exec();
+    resolve: (_, args) => {
+      const alertInfo = Alert.findById(args.id).exec();
       if (!alertInfo) {
-        throw new Error("Error");
+        throw new Error("Could not find alert with the given id.");
       }
       return alertInfo;
     },
@@ -53,19 +54,26 @@ const Mutation = {
       },
     },
 
-    resolve: async (params, context) => {
-      const token = context.req.cookies.token;
+    resolve: async (_, args, context) => {
+      const cookies=context.req.headers.cookie;
+      if(!cookies){
+        throw new Error("No cookies found in the request");
+      }
+      const parsedCookies = cookie.parse(cookies);
+      const token = parsedCookies.token;
+      if (!token) {
+        throw new Error("There is no token");
+      }
       const decodedToken = decode(token);
       const userId = decodedToken.id;
-      let alert = await Alert.findOne({ message: params.message });
+      let alert = await Alert.findOne({ message: args.message });
       if (!alert) {
-        const alertModel = new Alert({ patient: userId, ...params });
+        const alertModel = new Alert({ patient: userId, ...args });
         alert = await alertModel.save().then((alertDoc) => alertDoc.toObject());
         if (!alert) {
           throw new Error("Error sending the alert to first responders");
         }
       }
-
       return alert;
     },
   },
