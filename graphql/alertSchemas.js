@@ -55,8 +55,8 @@ const Mutation = {
     },
 
     resolve: async (_, args, context) => {
-      const cookies=context.req.headers.cookie;
-      if(!cookies){
+      const cookies = context.req.headers.cookie;
+      if (!cookies) {
         throw new Error("No cookies found in the request");
       }
       const parsedCookies = cookie.parse(cookies);

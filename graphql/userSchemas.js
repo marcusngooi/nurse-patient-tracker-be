@@ -18,7 +18,7 @@ const userType = new GraphQLObjectType({
       _id: {
         type: GraphQLID,
       },
-      userName: {
+      username: {
         type: GraphQLString,
       },
       password: {
@@ -88,7 +88,6 @@ const queryType = {
     resolve: async (_, __, context) => {
       const token = context.req.cookie.token;
       if (!token) {
-        console.log("User is not a nurse.");
         return false;
       }
       try {
@@ -97,7 +96,7 @@ const queryType = {
         const user = await UserModel.findById(userId);
         return user.userType === "nurse";
       } catch (err) {
-        console.error("Error verifying token or fetching user:", e);
+        console.error("Error verifying token or fetching user:", err);
         return false;
       }
     },
@@ -107,7 +106,6 @@ const queryType = {
     type: GraphQLBoolean,
     resolve: (_, __, context) => {
       const token = context.req.cookies.token;
-      console.log(token);
       if (!token) {
         return false;
       }
@@ -126,7 +124,7 @@ const Mutation = {
   signUp: {
     type: userType,
     args: {
-      userName: {
+      username: {
         type: new GraphQLNonNull(GraphQLString),
       },
       password: {
@@ -166,7 +164,11 @@ const Mutation = {
         throw new Error("Failed to save new user.");
       }
       const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      if (!token) {
+        throw new ERror("Failed to sign token");
+      }
       context.res.cookie("token", token, {
+        path: "/",
         maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
       return newUser;
@@ -176,7 +178,7 @@ const Mutation = {
   signIn: {
     type: userType,
     args: {
-      userName: {
+      username: {
         type: new GraphQLNonNull(GraphQLString),
       },
       password: {
@@ -185,21 +187,22 @@ const Mutation = {
     },
     resolve: async (_, args, context) => {
       const user = await UserModel.findOne({
-        userName: args.userName,
+        username: args.username,
       });
       if (!user) {
-        throw new Error("The user you entered does not exist.");
+        throw new Error("Invalid email or password");
       }
 
       const valid = await bcrypt.compare(args.password, user.password);
 
       if (!valid) {
-        throw new Error("The password you entered is incorrect.");
+        throw new Error("Invalid email or password");
       }
 
       const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET);
 
       context.res.cookie("token", token, {
+        path: "/",
         maxAge: process.env.JWT_EXPIRY_SECONDS * 1000,
       });
 
